@@ -1,0 +1,77 @@
+{
+	"name": "gulp-stacksvg",
+	"description": "The gulp plugin to combine svg files into one using the stack method.",
+	"version": "0.0.0",
+	"license": "MIT",
+	"author": {
+		"name": "Sergey Artemov",
+		"email": "firefoxic.dev@gmail.com"
+	},
+	"homepage": "https://github.com/firefoxic/gulp-stacksvg#readme",
+	"bugs": {
+		"url": "https://github.com/firefoxic/gulp-stacksvg/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/firefoxic/gulp-stacksvg.git"
+	},
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"./dist/"
+	],
+	"engines": {
+		"node": "^22.22 || ^24.15 || >=26.13"
+	},
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": ">=26.13",
+			"onFail": "download"
+		},
+		"packageManager": {
+			"name": "pnpm",
+			"version": ">=12.23",
+			"onFail": "download"
+		}
+	},
+	"dependencies": {
+		"node-html-parser": "^9",
+		"plugin-error": "^2",
+		"vinyl": "^3"
+	},
+	"scripts": {
+		"help": "make help",
+		"prepare": "git config --local core.hooksPath .githooks || true"
+	},
+	"peerDependencies": {
+		"gulp": "^5.0.1"
+	},
+	"devDependencies": {
+		"@firefoxic/oxlint-config": "~0.7",
+		"@types/gulp": "^4",
+		"@types/node": "^26",
+		"@types/vinyl": "^2",
+		"@vitest/coverage-v8": "^5",
+		"gulp": "^5",
+		"oxlint": "^1",
+		"tsrs": "latest",
+		"vitest": "^5"
+	},
+	"keywords": [
+		"gulp",
+		"gulpplugin",
+		"svg",
+		"icon",
+		"sprite",
+		"stack",
+		"vector"
+	]
+}
