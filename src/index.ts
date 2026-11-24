@@ -1,60 +1,37 @@
-import { Transform } from "node:stream"
-
-import PluginError from "plugin-error"
-import Vinyl from "vinyl"
-
 import { StackSvgCreator } from "./svg-processor.ts"
 
 /**
- * Create transform function for the plugin.
- *
- * @param {StackSvgCreator} processor - StackSvgCreator instance.
- * @returns {function} Transform function.
+ * An SVG source file to combine into a stack sprite.
  */
-function createTransform (processor: StackSvgCreator) {
-	return function transform (file: Vinyl, _: BufferEncoding, cb: (error?: Error | null) => void): void {
-		if (file.isStream()) return cb(new PluginError(`gulp-stacksvg`, `Streams are not supported!`))
+export interface SvgSource {
 
-		if (!file.isBuffer()) return cb()
+	/**
+	 * Path of the file, used to derive the fragment id.
+	 *
+	 * Directory separators become underscores, whitespace becomes hyphens and the extension is dropped, the way a path relative to the icons directory reads.
+	 */
+	path: string,
 
-		try {
-			processor.add(file.contents.toString(), file.relative)
-		}
-		catch (error) {
-			return cb(new PluginError(`gulp-stacksvg`, (error as Error).message))
-		}
-
-		cb()
-	}
+	/**
+	 * Content of the SVG file.
+	 */
+	contents: string,
 }
+
+export { StackSvgCreator }
 
 /**
- * Create flush function for the plugin.
+ * Combine SVG sources into a single stack sprite.
  *
- * @param {StackSvgCreator} processor - StackSvgCreator instance.
- * @param {Transform} stream - Gulp transform stream.
- * @returns {function} Flush function.
+ * Content holding no `svg` element is skipped silently. When no source yields an `svg` element the sprite is empty and `null` is returned.
+ *
+ * @param {SvgSource[]} sources - SVG sources to combine.
+ * @returns {string|null} Stack sprite content or null if empty.
  */
-function createFlush (processor: StackSvgCreator, stream: Transform) {
-	return function flush (cb: (error?: Error | null) => void): void {
-		let stackSprite = processor.getStackSprite()
-
-		if (!stackSprite) return cb()
-
-		let file = new Vinyl({ path: `stack.svg`, contents: Buffer.from(stackSprite) })
-
-		stream.push(file)
-
-		cb()
-	}
-}
-
-export function stacksvg (): Transform {
+export function stacksvg (sources: SvgSource[]): string | null {
 	let processor = new StackSvgCreator()
-	let stream = new Transform({ objectMode: true })
 
-	stream._transform = createTransform(processor)
-	stream._flush = createFlush(processor, stream)
+	for (let source of sources) processor.add(source.contents, source.path)
 
-	return stream
+	return processor.getStackSprite()
 }

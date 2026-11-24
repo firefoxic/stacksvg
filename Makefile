@@ -25,19 +25,19 @@ fix: ## 🩹 Fix code by oxlint
 .PHONY: fix
 
 test: ## 🧪 Run unit tests against the source
-	vitest run --project unit
+	vitest --project unit
 .PHONY: test
 
 watch: ## 👀 Rerun unit tests on every change
 	vitest --project unit
 .PHONY: watch
 
-smoke: ## 🚬 Manual smoke check via gulp (no build required)
-	gulp --gulpfile gulpfile.ts createStack
+smoke: ## 🚬 Manual smoke check via node (no build required)
+	scripts/smoke.ts
 .PHONY: smoke
 
 coverage: ## 📊 Report the unit test coverage of the source
-	vitest run --project unit --coverage
+	vitest --project unit --coverage
 .PHONY: coverage
 
 build: ## 🔨 Build the project
@@ -46,7 +46,7 @@ build: ## 🔨 Build the project
 .PHONY: build
 
 test-package: ## 📦 Test the package
-	vitest run --project package
+	vitest --project package
 .PHONY: test-package
 
 verify: check lint test test-package build ## ✅ Run every check the CI runs

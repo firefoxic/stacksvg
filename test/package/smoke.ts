@@ -1,10 +1,9 @@
-import Vinyl from "vinyl"
 import { describe, expect, test } from "vitest"
 
-import { stacksvg } from "../../src/index.ts"
+import { StackSvgCreator, stacksvg } from "../../src/index.ts"
 
 /**
- * This suite proves the plugin works end to end against the TypeScript source
+ * This suite proves the package works end to end against the TypeScript source
  * directly, with no build step: type stripping runs the `.ts` files as-is.
  */
 describe(`package`, () => {
@@ -12,30 +11,26 @@ describe(`package`, () => {
 		expect(typeof stacksvg).toBe(`function`)
 	})
 
-	test(`Package should build a sprite end to end`, async () => {
-		let stream = stacksvg()
+	test(`Package should export the creator class`, () => {
+		expect(typeof StackSvgCreator).toBe(`function`)
+	})
 
-		let files = await new Promise<Vinyl[]>((resolve) => {
-			let collected: Vinyl[] = []
-
-			stream.on(`data`, (file: Vinyl) => { collected.push(file) })
-			stream.on(`end`, () => { resolve(collected) })
-
-			stream.write(new Vinyl({
+	test(`Package should build a sprite end to end`, () => {
+		let sprite = stacksvg([
+			{
 				path: `circle.svg`,
-				contents: Buffer.from(`<svg viewBox="0 0 4 4"><circle cx="2" cy="2" r="1"/></svg>`),
-			}))
-			stream.end()
-		})
+				contents: `<svg viewBox="0 0 4 4"><circle cx="2" cy="2" r="1"/></svg>`,
+			},
+		])
 
-		expect(files).toHaveLength(1)
-		expect(files[0].relative).toBe(`stack.svg`)
-		expect(contentsOf(files[0])).toBe(`<svg xmlns="http://www.w3.org/2000/svg"><style>:root svg:not(:target){display:none}</style><svg viewBox="0 0 4 4" id="circle"><circle cx="2" cy="2" r="1"></circle></svg></svg>`)
+		expect(sprite).toBe(`<svg xmlns="http://www.w3.org/2000/svg"><style>:root svg:not(:target){display:none}</style><svg viewBox="0 0 4 4" id="circle"><circle cx="2" cy="2" r="1"></circle></svg></svg>`)
+	})
+
+	test(`Package should build a sprite incrementally through the creator class`, () => {
+		let processor = new StackSvgCreator()
+
+		processor.add(`<svg viewBox="0 0 4 4"><circle cx="2" cy="2" r="1"/></svg>`, `circle.svg`)
+
+		expect(processor.getStackSprite()).toBe(`<svg xmlns="http://www.w3.org/2000/svg"><style>:root svg:not(:target){display:none}</style><svg viewBox="0 0 4 4" id="circle"><circle cx="2" cy="2" r="1"></circle></svg></svg>`)
 	})
 })
-
-function contentsOf (file: Vinyl): string {
-	if (!file.isBuffer()) throw new Error(`expected a buffer file`)
-
-	return file.contents.toString()
-}

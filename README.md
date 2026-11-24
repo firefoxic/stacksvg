@@ -1,76 +1,98 @@
 <!-- markdownlint-disable MD007 -->
-# gulp-stacksvg
+# @firefoxic/stacksvg
 
 [![License: MIT][license-image]][license-url]
 [![Changelog][changelog-image]][changelog-url]
 [![Test Status][test-image]][test-url]
 
-The gulp plugin to combine svg files into one using the stack method.
+The standalone engine to combine svg files into one using the stack method.
+
+It is framework-agnostic: a Node API today, a command-line interface next, and no dependency on gulp or any other build tool. The [gulp-stacksvg](https://github.com/firefoxic/gulp-stacksvg) plugin is a thin wrapper around it.
 
 ## Installation
 
 ```shell
-pnpm add -D gulp gulp-stacksvg
+pnpm add -D @firefoxic/stacksvg
 ```
 
 ## Usage
 
-Add the following to your `gulpfile.js`:
+### Node API
+
+Pass the sources to `stacksvg()` and get the sprite back. Each source is an object with the `path` of the file — used to derive the fragment name — and its `contents`:
 
 ```js
-import { stacksvg } from "gulp-stacksvg"
-import { dest, src } from "gulp"
+import { readFile, writeFile } from "node:fs/promises"
+import { stacksvg } from "@firefoxic/stacksvg"
 
-export function createStack () {
-	return src(`./src/shared/icons/**/*.svg`)
-		.pipe(stacksvg())
-		.pipe(dest(`./dist/shared/icons`))
-}
+let names = [`circle.svg`, `square.svg`]
+
+let sources = await Promise.all(names.map(async (name) => ({
+	path: name,
+	contents: await readFile(`./icons/${name}`, `utf8`),
+})))
+
+let sprite = stacksvg(sources)
+
+if (sprite !== null) await writeFile(`./stack.svg`, sprite)
 ```
 
-To combine all icons from `./src/shared/icons/` into the `./dist/shared/icons/stack.svg` run:
+`stacksvg()` returns the sprite as a string, or `null` when no source held an `svg` element.
 
-```shell
-pnpm gulp createStack
+When the sources arrive one at a time — as they do in a stream — drive the creator class directly and read the sprite once at the end:
+
+```js
+import { StackSvgCreator } from "@firefoxic/stacksvg"
+
+let creator = new StackSvgCreator()
+
+creator.add(content, `icons/circle.svg`)
+// …one call per icon…
+
+let sprite = creator.getStackSprite()
 ```
+
+### CLI
+
+Coming soon.
 
 ## Fragment names
 
-Every icon keeps its own `svg` element inside the stack, named after the path of the source file relative to the directory the icons were read from:
+Every icon keeps its own `svg` element inside the stack, named after the path of the source file relative to the directory the icons were read from:
 
 - the extension is dropped,
 - the directory separators become underscores,
 - the whitespace characters become hyphens.
 
-So `./src/shared/icons/social/like me.svg` becomes `social_like-me`, and the fragment is referenced as `./dist/shared/icons/stack.svg#social_like-me`.
+So `./src/shared/icons/social/like me.svg` becomes `social_like-me`, and the fragment is referenced as `./dist/shared/icons/stack.svg#social_like-me`.
 
-Two icons whose paths collapse to the same name — `social/like.svg` and `social_like.svg`, for instance — abort the build, since the stack has no way to tell such fragments apart.
+Two icons whose paths collapse to the same name — `social/like.svg` and `social_like.svg`, for instance — throw, since the stack has no way to tell such fragments apart.
 
-Identifiers used inside an icon are renamed to `<fragment name>_<number>`, so that icons declaring the same gradient, mask or filter stay independent once stacked. Do not rely on these from the outside: the numbering follows the document order of the icon and shifts whenever the icon changes.
+Identifiers used inside an icon are renamed to `<fragment name>_<number>`, so that icons declaring the same gradient, mask or filter stay independent once stacked. Do not rely on these from the outside: the numbering follows the document order of the icon and shifts whenever the icon changes.
 
 ## Why a stack?
 
-Unlike all other methods for assembling a sprite, the stack does not limit us in choosing how to insert a vector into a page. Take a look at [the results](https://demos.frontend-design.ru/sprite/src/) of different ways to display fragments of different types of sprites.
+Unlike all other methods for assembling a sprite, the stack does not limit us in choosing how to insert a vector into a page. Take a look at [the results](https://demos.frontend-design.ru/sprite/src/) of different ways to display fragments of different types of sprites.
 
-We can use the stack in all four possible ways:
+We can use the stack in all four possible ways:
 
 - in markup:
 
 	- in `src` of `img` tag — static,
-	- in the `href` of the `use` tag — with the possibility of repainting,
+	- in the `href` of the `use` tag — with the possibility of repainting,
 
 - in styles:
 
 	- in `url()` properties `background` — static,
 	- in `url()` properties `mask` — with the possibility of repainting.
 
-[Demo page](https://firefoxic.github.io/gulp-stacksvg/example/) to prove it.
+[Demo page](https://firefoxic.github.io/stacksvg/example/) to prove it.
 
 ## Stack under the hood
 
 This method was first mentioned in a Simurai [article](https://simurai.com/blog/2012/04/02/svg-stacks) on April 2, 2012. But even it uses unnecessarily complex code transformations.
 
-This can be done much easier. In general, the stack is arranged almost like a symbol sprite, but without changing the icon tag (it remains the `svg` tag, as in the original icon files) and with the addition of a tiny bit of style.
+This can be done much easier. In general, the stack is arranged almost like a symbol sprite, but without changing the icon tag (it remains the `svg` tag, as in the original icon files) and with the addition of a tiny bit of style.
 
 ```xml
 <svg xmlns="http://www.w3.org/2000/svg">
@@ -78,7 +100,7 @@ This can be done much easier. In general, the stack is arranged almost like a�
 	<style>:root svg:not(:target) { display: none }</style>
 ```
 
-<img align="left" width="90" height="90" title="sun" src="https://raw.githubusercontent.com/firefoxic/gulp-stacksvg/main/docs/example/stack.svg#sun-alpha">
+<img align="left" width="90" height="90" title="sun" src="https://raw.githubusercontent.com/firefoxic/stacksvg/main/docs/example/stack.svg#sun-alpha">
 
 ```xml
 <svg id="sun" viewBox="0 0 24 24">
@@ -86,7 +108,7 @@ This can be done much easier. In general, the stack is arranged almost like a�
 </svg>
 ```
 
-<img align="left" width="90" height="90" title="heart" src="https://raw.githubusercontent.com/firefoxic/gulp-stacksvg/main/docs/example/stack.svg#heart-red">
+<img align="left" width="90" height="90" title="heart" src="https://raw.githubusercontent.com/firefoxic/stacksvg/main/docs/example/stack.svg#heart-red">
 
 ```xml
 <svg id="heart" viewBox="0 0 24 24">
@@ -94,7 +116,7 @@ This can be done much easier. In general, the stack is arranged almost like a�
 </svg>
 ```
 
-<img align="left" width="90" height="90" title="thumbup" src="https://raw.githubusercontent.com/firefoxic/gulp-stacksvg/main/docs/example/stack.svg#thumbup-alpha">
+<img align="left" width="90" height="90" title="thumbup" src="https://raw.githubusercontent.com/firefoxic/stacksvg/main/docs/example/stack.svg#thumbup-alpha">
 
 ```xml
 <svg id="thumbup" viewBox="0 0 24 24">
@@ -106,13 +128,13 @@ This can be done much easier. In general, the stack is arranged almost like a�
 </svg>
 ```
 
-The magic is in the stack inner style, which shows only the fragment requested by the link, hiding everything else:
+The magic is in the stack inner style, which shows only the fragment requested by the link, hiding everything else:
 
 ```css
 :root svg:not(:target) { display: none }
 ```
 
-And now the icons from the external sprite are available in the styles <img width="16" height="16" title="heart" src="https://raw.githubusercontent.com/firefoxic/gulp-stacksvg/main/docs/example/stack.svg#heart-red" alt="heart">
+And now the icons from the external sprite are available in the styles <img width="16" height="16" title="heart" src="https://raw.githubusercontent.com/firefoxic/stacksvg/main/docs/example/stack.svg#heart-red" alt="heart">
 
 ```html
 <button class="button button--icon_heart" type="button">
@@ -146,17 +168,17 @@ And now the icons from the external sprite are available in the styles <img 
 }
 ```
 
-For an icon inserted via `mask`, simply change the `background`. Moreover, unlike `use`, you can draw anything in the background under the mask, for example, a gradient.
+For an icon inserted via `mask`, simply change the `background`. Moreover, unlike `use`, you can draw anything in the background under the mask, for example, a gradient.
 
 ## More info
 
-- [SVG sprites: old-school, modern, unknown, and forgotten](https://pepelsbey.dev/articles/svg-sprites/#forgotten-stacks) by [Vadim Makeev](https://mastodon.social/@pepelsbey)
+- [SVG sprites: old-school, modern, unknown, and forgotten](https://pepelsbey.dev/articles/svg-sprites/#forgotten-stacks) by [Vadim Makeev](https://mastodon.social/@pepelsbey)
 
-[license-url]: https://github.com/firefoxic/gulp-stacksvg/blob/main/LICENSE.md
+[license-url]: https://github.com/firefoxic/stacksvg/blob/main/LICENSE.md
 [license-image]: https://img.shields.io/badge/License-MIT-limegreen.svg
 
-[changelog-url]: https://github.com/firefoxic/gulp-stacksvg/blob/main/CHANGELOG.md
+[changelog-url]: https://github.com/firefoxic/stacksvg/blob/main/CHANGELOG.md
 [changelog-image]: https://img.shields.io/badge/CHANGELOG-md-limegreen
 
-[test-url]: https://github.com/firefoxic/gulp-stacksvg/actions
-[test-image]: https://github.com/firefoxic/gulp-stacksvg/actions/workflows/test.yaml/badge.svg?branch=main
+[test-url]: https://github.com/firefoxic/stacksvg/actions
+[test-image]: https://github.com/firefoxic/stacksvg/actions/workflows/test.yaml/badge.svg?branch=main

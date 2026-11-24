@@ -1,19 +1,19 @@
 {
-	"name": "gulp-stacksvg",
-	"description": "The gulp plugin to combine svg files into one using the stack method.",
+	"name": "@firefoxic/stacksvg",
+	"description": "Combine svg files into one using the stack method.",
 	"version": "0.0.0",
 	"license": "MIT",
 	"author": {
 		"name": "Sergey Artemov",
 		"email": "firefoxic.dev@gmail.com"
 	},
-	"homepage": "https://github.com/firefoxic/gulp-stacksvg#readme",
+	"homepage": "https://github.com/firefoxic/stacksvg#readme",
 	"bugs": {
-		"url": "https://github.com/firefoxic/gulp-stacksvg/issues"
+		"url": "https://github.com/firefoxic/stacksvg/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/firefoxic/gulp-stacksvg.git"
+		"url": "git+https://github.com/firefoxic/stacksvg.git"
 	},
 	"type": "module",
 	"types": "./dist/index.d.ts",
@@ -43,31 +43,21 @@
 		}
 	},
 	"dependencies": {
-		"node-html-parser": "^9",
-		"plugin-error": "^2",
-		"vinyl": "^3"
+		"node-html-parser": "^9"
 	},
 	"scripts": {
 		"help": "make help",
 		"prepare": "git config --local core.hooksPath .githooks || true"
 	},
-	"peerDependencies": {
-		"gulp": "^5.0.1"
-	},
 	"devDependencies": {
 		"@firefoxic/oxlint-config": "~0.7",
-		"@types/gulp": "^4",
 		"@types/node": "^26",
-		"@types/vinyl": "^2",
 		"@vitest/coverage-v8": "^5",
-		"gulp": "^5",
 		"oxlint": "^1",
 		"tsrs": "latest",
 		"vitest": "^5"
 	},
 	"keywords": [
-		"gulp",
-		"gulpplugin",
 		"svg",
 		"icon",
 		"sprite",

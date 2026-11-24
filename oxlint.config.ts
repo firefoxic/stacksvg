@@ -6,15 +6,4 @@ export default defineConfig({
 	"env": {
 		node: true,
 	},
-	"rules": {
-		"no-underscore-dangle": [
-			`error`,
-			{
-				allow: [
-					`_flush`,
-					`_transform`,
-				],
-			},
-		],
-	},
 })
