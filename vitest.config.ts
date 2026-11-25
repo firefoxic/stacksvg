@@ -19,6 +19,10 @@ export default defineConfig({
 		],
 		coverage: {
 			include: [`src/**`],
+			exclude: [
+				// The CLI is a thin input/output wrapper around the library; its behaviour is covered end to end in the `package` project.
+				`src/cli.ts`,
+			],
 			reporter: [`text`, `html`],
 			thresholds: {
 				statements: 100,

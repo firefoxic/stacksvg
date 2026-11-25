@@ -54,7 +54,20 @@ let sprite = creator.getStackSprite()
 
 ### CLI
 
-Coming soon.
+Install the package and run the `stacksvg` command in the directory that holds the icons. By default it reads the working directory recursively and writes `stack.svg` next to it:
+
+```shell
+pnpm add -D @firefoxic/stacksvg
+stacksvg
+```
+
+Point it at another directory with `-i` (or `--input`), and send the sprite elsewhere with `-o` (or `--output`):
+
+```shell
+stacksvg -i ./src/shared/icons -o ./dist/shared/icons/stack.svg
+```
+
+The fragment names come from the path of each file relative to the input directory, so an icon at `./src/shared/icons/social/like.svg` read with `-i ./src/shared/icons` becomes `social_like`. The sprite is left out of the sources, so running the command again in the same place does not fold the previous stack back in. The command exits non-zero when no svg file is found or when two icons collapse to the same name.
 
 ## Fragment names
 

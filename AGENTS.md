@@ -14,7 +14,7 @@ All tasks go through the `Makefile` (targets add `node_modules/.bin` to `PATH
 | `make test` | `vitest run --project unit` — the fast loop, no build needed |
 | `make watch` | The same suite in watch mode |
 | `make coverage` | Unit suite with a v8 coverage report over `src/` |
-| `make smoke` | Run `scripts/smoke.ts` against the TypeScript source (no build) and regenerate [docs/example/stack.svg](docs/example/stack.svg) from [docs/example/icons/](docs/example/icons) |
+| `make smoke` | Run `src/cli.ts` against the TypeScript source (no build) and regenerate [docs/example/stack.svg](docs/example/stack.svg) from [docs/example/icons/](docs/example/icons) |
 | `make build` | Runs `check` + `lint`, then bundles with `tsrs` into `dist/` |
 | `make test-package` | Runs `vitest run --project package` — end-to-end against the source |
 | `make verify` | `check` + `lint` + `test` + `test-package` + `build` — the full gate, what CI and the pre-commit hook run |
@@ -35,6 +35,7 @@ This is a standalone, framework-agnostic engine for combining svg files into 
 
 - [src/svg-processor.ts](src/svg-processor.ts) — all SVG logic. `StackSvgCreator` holds the growing DOM (`node-html-parser`), seeded with `<svg><style>:root svg:not(:target){display:none}</style></svg>`. That style rule is the entire stack technique: only the `:target` fragment renders.
 - [src/index.ts](src/index.ts) — the public Node API. It re-exports `StackSvgCreator` for incremental assembly (one `add()` per source, `getStackSprite()` at the end) and provides the one-shot `stacksvg(sources)` convenience function, which feeds a fresh creator and returns the sprite — or `null` when no source held an `svg` element.
+- [src/cli.ts](src/cli.ts) — the `stacksvg` command (`bin` → `dist/cli.js`). It reads every svg under the input directory (`-i`, default the working directory) recursively and feeds them to `stacksvg()` with paths relative to the input directory. The output file (`-o`, default `stack.svg`) is dropped from the sources, so a sprite written into the input directory is not read back on the next run — the exclusion lives here rather than in the library, which has no notion of an output file and just combines what it is given. The shebang survives the build, and `isMain()` guards the run so the module can be imported by tests without executing. `parseArgs` is kept pure and unit-tested; the end-to-end behaviour is covered by spawning the command in the `package` project.
 
 `StackSvgCreator.add()` per icon:
 

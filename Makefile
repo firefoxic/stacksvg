@@ -32,8 +32,9 @@ watch: ## 👀 Rerun unit tests on every change
 	vitest --project unit
 .PHONY: watch
 
-smoke: ## 🚬 Manual smoke check via node (no build required)
-	scripts/smoke.ts
+smoke: ## 🚬 Manual smoke check via the CLI (no build required)
+	src/cli.ts --input ./docs/example/icons --output ./docs/example/stack.svg
+	git diff --exit-code HEAD -- ./docs/example/stack.svg
 .PHONY: smoke
 
 coverage: ## 📊 Report the unit test coverage of the source
@@ -49,7 +50,7 @@ test-package: ## 📦 Test the package
 	vitest --project package
 .PHONY: test-package
 
-verify: check lint test test-package build ## ✅ Run every check the CI runs
+verify: check lint test test-package smoke build ## ✅ Run every check the CI runs
 .PHONY: verify
 
 release: verify ## 🚀 Release a new version
