@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and 
 
 ## [Unreleased]
 
+## [1.0.0] — 2026–11–26
+
 ### Changed
 
 - The project [`gulp-stacksvg`](https://github.com/firefoxic/gulp-stacksvg/) is forked with the name `@firefoxic/stacksvg`.
@@ -17,4 +19,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and 
 
 - The package now ships a `stacksvg` command line, so a stack can be built straight from the matched svg files with no build tool in the way.
 
-[Unreleased]: https://github.com/firefoxic/stacksvg/compare/v0.0.0...HEAD
+[Unreleased]: https://github.com/firefoxic/stacksvg/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/firefoxic/stacksvg/compare/v0.0.0...v1.0.0
