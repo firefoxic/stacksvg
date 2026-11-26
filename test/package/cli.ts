@@ -64,7 +64,7 @@ describe(`cli`, () => {
 
 		let sprite = await readFile(output, `utf8`)
 
-		expect(sprite).toBe(`<svg xmlns="http://www.w3.org/2000/svg"><style>:root svg:not(:target){display:none}</style><svg viewBox="0 0 4 4" id="circle"><circle cx="2" cy="2" r="1"></circle></svg><svg id="sub_square"><rect x="1" y="1" width="2" height="2"></rect></svg></svg>`)
+		expect(sprite).toBe(`<svg xmlns="http://www.w3.org/2000/svg"><style>:root svg:not(:target){display:none}</style><svg viewBox="0 0 4 4" id="circle"><circle cx="2" cy="2" r="1"/></svg><svg id="sub_square"><rect x="1" y="1" width="2" height="2"/></svg></svg>`)
 	})
 
 	test(`Command should not read the sprite it wrote on the previous run`, async () => {

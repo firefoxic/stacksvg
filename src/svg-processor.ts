@@ -16,6 +16,13 @@ const EXCESS_ATTRS = [
 const XLINK = `http://www.w3.org/1999/xlink`
 
 /**
+ * Matches an element with no content — an opening tag immediately followed by its own closing tag — so that it can be rewritten as self-closing.
+ *
+ * The attribute part consumes quoted values whole, so a `>` inside an attribute does not end the tag early, and the backreference keeps the closing tag honest, so only a matching pair is collapsed. The parser is an HTML one and always emits a closing tag, which is why the empty elements are recognized here, on the serialized string, rather than left to the parser.
+ */
+const EMPTY_ELEMENT = /<([a-zA-Z][^\s/>]*)((?:"[^"]*"|'[^']*'|[^>'"])*)><\/\1>/gu
+
+/**
  * Get a hash for a given string.
  *
  * The hash is not used for anything cryptographic — an hmac keyed with a constant is just a convoluted digest here. The `xmlns` key is nonetheless part of the output contract: it decides the suffix appended to a duplicate namespace alias, so changing it, or moving to a plain digest, renames every such alias in every stack built so far.
@@ -188,6 +195,8 @@ export class StackSvgCreator {
 	/**
 	 * Get the final stack sprite content.
 	 *
+	 * Empty elements are written self-closing, so the sprite carries no closing tags it does not need.
+	 *
 	 * @returns {string|null} Stack sprite content or null if empty.
 	 */
 	public getStackSprite (): string | null {
@@ -195,7 +204,7 @@ export class StackSvgCreator {
 
 		for (let [nsId, nsAttr] of this.namespaces) this.rootSvg.setAttribute(nsAttr, nsId)
 
-		return this.stack.toString()
+		return this.stack.toString().replaceAll(EMPTY_ELEMENT, `<$1$2/>`)
 	}
 
 	/**
